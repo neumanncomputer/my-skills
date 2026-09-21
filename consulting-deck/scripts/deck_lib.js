@@ -37,6 +37,16 @@ const C = {
   red: "E0301E",       // リスク・警告（限定使用）
   tint: "FBEAE0",      // オレンジの淡色（強調エリアの背景）
   white: "FFFFFF",
+  muted: "BFBFBF",     // グラフの非注目部分
+  grid: "EDEDED",      // グラフの目盛線
+};
+
+// 枠線（この3種類以外は使わない）
+const B = {
+  std: { color: C.line, width: 0.75 },    // 標準：囲み・表・上下罫線
+  thin: { color: C.line, width: 0.5 },    // 細線：リスト内の区切り（アジェンダ、ロードマップの行）
+  key: { color: C.orange, width: 1.5 },   // 強調：最重要のカード1つだけ
+  gap: (w = 1) => ({ color: C.white, width: w }), // 隣接する塗り同士のすき間（白線）
 };
 
 const F = {
@@ -110,8 +120,8 @@ class Deck {
         ]
       : [];
     const rules = [
-      { line: { x: G.M, y: G.RULE_TOP_Y, w: G.CW, h: 0, line: { color: C.line, width: 0.75 } } },
-      { line: { x: G.M, y: G.RULE_BOTTOM_Y, w: G.CW, h: 0, line: { color: C.line, width: 0.75 } } },
+      { line: { x: G.M, y: G.RULE_TOP_Y, w: G.CW, h: 0, line: { ...B.std } } },
+      { line: { x: G.M, y: G.RULE_BOTTOM_Y, w: G.CW, h: 0, line: { ...B.std } } },
     ];
     const titlePh = { placeholder: { options: { name: "title", type: "title", ...G.TITLE, fontFace: F.face, fontSize: F.title, bold: true, color: C.text, align: "left", valign: "top", margin: 0, lineSpacingMultiple: 1.15 }, text: "" } };
     const slideNumber = { ...G.PAGE, fontFace: F.face, fontSize: F.note, color: C.sub, align: "right", valign: "top", margin: 0 };
@@ -228,7 +238,7 @@ class Deck {
     this.count++;
     s.addText(stripMarks(title), { x: 0.8, y: 2.3, w: 11.7, h: 1.5, fontFace: F.face, fontSize: F.cover, bold: true, color: C.text, valign: "bottom", margin: 0, isTextBox: true });
     if (subtitle) s.addText(stripMarks(subtitle), { x: 0.8, y: 3.95, w: 11.7, h: 0.6, fontFace: F.face, fontSize: 16, color: C.sub, valign: "top", margin: 0, isTextBox: true });
-    s.addShape(this.pres.shapes.LINE, { x: 0.8, y: 5.9, w: 11.733, h: 0, line: { color: C.line, width: 0.75 } });
+    s.addShape(this.pres.shapes.LINE, { x: 0.8, y: 5.9, w: 11.733, h: 0, line: { ...B.std } });
     s.addText([date, author].filter(Boolean).join("　｜　"), { x: 0.8, y: 6.0, w: 9, h: 0.4, fontFace: F.face, fontSize: F.label, color: C.sub, margin: 0, isTextBox: true });
     if (this.opts.status) {
       s.addShape(this.pres.shapes.RECTANGLE, { ...G.STATUS, fill: { color: C.white }, line: { color: C.sub, width: 0.75 } });
@@ -256,7 +266,7 @@ class Deck {
     const rowH = n ? (a.y + a.h - y) / n : 0;
     points.forEach((p, i) => {
       const ry = y + i * rowH;
-      if (i > 0) s.addShape(this.pres.shapes.LINE, { x: a.x, y: ry, w: a.w, h: 0, line: { color: C.line, width: 0.75 } });
+      if (i > 0) s.addShape(this.pres.shapes.LINE, { x: a.x, y: ry, w: a.w, h: 0, line: { ...B.std } });
       s.addText(String(i + 1).padStart(2, "0"), { x: a.x, y: ry, w: 0.5, h: rowH, fontFace: F.face, fontSize: F.body, bold: true, color: C.sub, valign: "middle", margin: 0, isTextBox: true });
       s.addText(parseRich(p.head, { fontFace: F.face, fontSize: F.body, bold: true, color: C.text }), { x: a.x + 0.55, y: ry, w: 2.4, h: rowH, valign: "middle", margin: 0, isTextBox: true });
       this._countMarks(s, p.head, true);
@@ -277,7 +287,7 @@ class Deck {
       const y = a.y + 0.1 + i * rowH, on = current === i, dim = current !== null && !on;
       s.addText(String(i + 1), { x: a.x + 0.3, y, w: 0.6, h: rowH, fontFace: F.face, fontSize: 18, bold: true, color: on ? C.orange : dim ? C.line : C.sub, valign: "middle", margin: 0, isTextBox: true });
       s.addText(stripMarks(it), { x: a.x + 1.0, y, w: 10, h: rowH, fontFace: F.face, fontSize: 16, bold: on, color: dim ? C.sub : C.text, valign: "middle", margin: 0, isTextBox: true });
-      if (i < items.length - 1) s.addShape(this.pres.shapes.LINE, { x: a.x + 1.0, y: y + rowH, w: 8, h: 0, line: { color: C.line, width: 0.5 } });
+      if (i < items.length - 1) s.addShape(this.pres.shapes.LINE, { x: a.x + 1.0, y: y + rowH, w: 8, h: 0, line: { ...B.thin } });
     });
     return s;
   }
@@ -313,7 +323,7 @@ class Deck {
       const x = a.x + i * (w + arrow + 0.2);
       const key = c.key !== undefined ? c.key : i === n - 1;
       this._header(s, x, a.y, w, c.label, key ? "key" : "gray");
-      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y + 0.45, w, h: a.h - 0.45, fill: { color: C.white }, line: { color: C.line, width: 0.75 } });
+      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y + 0.45, w, h: a.h - 0.45, fill: { color: C.white }, line: { ...B.std } });
       this._bullets(s, c.points, { x: x + 0.1, y: a.y + 0.6, w: w - 0.2, h: a.h - 0.7 }, { label: c.label });
       if (i < n - 1) s.addShape(this.pres.shapes.CHEVRON, { x: x + w + 0.1, y: a.y + a.h / 2 - 0.2, w: arrow, h: 0.4, fill: { color: C.line }, line: { color: C.line } });
     });
@@ -359,7 +369,7 @@ class Deck {
     const isPie = type === "pie" || type === "doughnut";
     const multi = data.length > 1;
     const GRAYS = ["A6A6A6", "C4C4C4", "DEDEDE", "EDEDED", "B4B4B4"];
-    const MUTED = "BFBFBF";
+    const MUTED = C.muted;
     let colors = [C.orange, C.tangerine, C.yellow, C.sub, C.line];
     let vary = false;
     if (isPie) {
@@ -388,7 +398,7 @@ class Deck {
       Object.assign(base, {
         catAxisLabelFontFace: F.face, valAxisLabelFontFace: F.face, catAxisLabelFontSize: F.small, valAxisLabelFontSize: F.small,
         catAxisLabelColor: C.sub, valAxisLabelColor: C.sub, catAxisLineShow: true,
-        valGridLine: { color: "EDEDED", size: 0.5 }, catGridLine: { style: "none" },
+        valGridLine: { color: C.grid, size: 0.5 }, catGridLine: { style: "none" },
         showValue: true, dataLabelPosition: type === "bar" ? "outEnd" : "t",
         showLegend: multi, legendPos: "t", legendFontSize: F.small, legendFontFace: F.face, legendColor: C.text,
         barGapWidthPct: 60, lineSize: 2, lineDataSymbolSize: 6,
@@ -404,7 +414,7 @@ class Deck {
     const mw = 7.2, mx = a.x + 0.55, my = a.y, mh = a.h - 0.5, qw = mw / 2, qh = mh / 2;
     [[0, 0], [1, 0], [0, 1], [1, 1]].forEach(([cx, cy], i) => {
       const on = keyQuadrant === i;
-      s.addShape(this.pres.shapes.RECTANGLE, { x: mx + cx * qw, y: my + cy * qh, w: qw, h: qh, fill: { color: on ? C.tint : C.fill }, line: { color: C.white, width: 2 } });
+      s.addShape(this.pres.shapes.RECTANGLE, { x: mx + cx * qw, y: my + cy * qh, w: qw, h: qh, fill: { color: on ? C.tint : C.fill }, line: B.gap(2) });
       if (quadrants[i]) s.addText(stripMarks(quadrants[i]), { x: mx + cx * qw + 0.1, y: my + cy * qh + 0.08, w: qw - 0.2, h: 0.35, fontFace: F.face, fontSize: F.small, bold: true, color: on ? C.orange : C.sub, margin: 0, isTextBox: true });
     });
     // 軸
@@ -413,7 +423,7 @@ class Deck {
     // プロット
     items.forEach((it) => {
       const d = 0.22, px = mx + it.x * mw - d / 2, py = my + (1 - it.y) * mh - d / 2;
-      s.addShape(this.pres.shapes.OVAL, { x: px, y: py, w: d, h: d, fill: { color: it.highlight ? C.orange : C.sub }, line: { color: C.white, width: 1 } });
+      s.addShape(this.pres.shapes.OVAL, { x: px, y: py, w: d, h: d, fill: { color: it.highlight ? C.orange : C.sub }, line: B.gap(1) });
       s.addText(stripMarks(it.label), { x: px + d + 0.05, y: py - 0.07, w: 2.2, h: 0.36, fontFace: F.face, fontSize: F.small, bold: !!it.highlight, color: it.highlight ? C.orange : C.text, margin: 0, isTextBox: true });
     });
     const rx = mx + mw + G.GAP + 0.1;
@@ -433,7 +443,7 @@ class Deck {
     criteria.forEach((c) => {
       rows.push([
         { text: stripMarks(c.name), options: { bold: true, color: C.text, valign: "middle" } },
-        ...c.values.map((v, i) => ({ text: parseRich(String(v), {}), options: { color: C.text, align: "center", valign: "middle", fill: { color: i === recommend ? "FDF4EE" : C.white } } })),
+        ...c.values.map((v, i) => ({ text: parseRich(String(v), {}), options: { color: C.text, align: "center", valign: "middle", fill: { color: i === recommend ? C.tint : C.white } } })),
       ]);
       c.values.forEach((v) => this._countMarks(s, String(v)));
     });
@@ -453,7 +463,7 @@ class Deck {
     const n = Math.min(kpis.length, 4) || 1, w = (a.w - G.GAP * (n - 1)) / n, cardH = points.length ? 2.3 : a.h;
     kpis.slice(0, 4).forEach((k, i) => {
       const x = a.x + i * (w + G.GAP), key = k.key !== undefined ? k.key : i === 0;
-      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y, w, h: cardH, fill: { color: C.white }, line: { color: key ? C.orange : C.line, width: key ? 1.5 : 0.75 } });
+      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y, w, h: cardH, fill: { color: C.white }, line: key ? { ...B.key } : { ...B.std } });
       s.addText(stripMarks(k.name), { x: x + 0.2, y: a.y + 0.2, w: w - 0.4, h: 0.35, fontFace: F.face, fontSize: F.label, bold: true, color: C.text, margin: 0, valign: "top", isTextBox: true });
       s.addText([
         { text: String(k.target), options: { fontSize: F.stat, bold: true, color: key ? C.orange : C.text } },
@@ -478,7 +488,7 @@ class Deck {
     const rowH = Math.min(1.0, (a.h - headH - msH) / Math.max(tracks.length, 1));
     periods.forEach((p, i) => {
       const x = a.x + labW + i * pw;
-      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y, w: pw, h: headH, fill: { color: C.fill }, line: { color: C.white, width: 1 } });
+      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y, w: pw, h: headH, fill: { color: C.fill }, line: B.gap(1) });
       s.addText(p, { x, y: a.y, w: pw, h: headH, fontFace: F.face, fontSize: F.label, bold: true, color: C.text, align: "center", valign: "middle", margin: 0, isTextBox: true });
     });
     milestones.forEach((m) => {
@@ -489,7 +499,7 @@ class Deck {
     tracks.forEach((t, r) => {
       const y = a.y + headH + msH + r * rowH;
       s.addText(stripMarks(t.name), { x: a.x, y, w: labW - 0.15, h: rowH, fontFace: F.face, fontSize: F.label, bold: true, color: C.text, valign: "middle", margin: 0, isTextBox: true });
-      s.addShape(this.pres.shapes.LINE, { x: a.x, y: y + rowH, w: a.w, h: 0, line: { color: C.line, width: 0.5 } });
+      s.addShape(this.pres.shapes.LINE, { x: a.x, y: y + rowH, w: a.w, h: 0, line: { ...B.thin } });
       (t.tasks || []).forEach((k) => {
         const x = a.x + labW + k.start * pw + 0.05, w = (k.end - k.start + 1) * pw - 0.1, bh = Math.min(0.5, rowH - 0.2);
         s.addShape(this.pres.shapes.RECTANGLE, { x, y: y + (rowH - bh) / 2, w, h: bh, fill: { color: k.key ? C.orange : C.line }, line: { color: k.key ? C.orange : C.line } });
@@ -513,7 +523,7 @@ class Deck {
     if (hasDec) {
       const x = a.x + tw + G.GAP, w = a.w - tw - G.GAP;
       this._header(s, x, a.y, w, "ご判断いただきたい事項", "key");
-      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y + 0.45, w, h: a.h - 0.45, fill: { color: C.white }, line: { color: C.line, width: 0.75 } });
+      s.addShape(this.pres.shapes.RECTANGLE, { x, y: a.y + 0.45, w, h: a.h - 0.45, fill: { color: C.white }, line: { ...B.std } });
       this._bullets(s, decisions, { x: x + 0.1, y: a.y + 0.6, w: w - 0.2, h: a.h - 0.7 }, { label: "意思決定事項" });
     }
     this._finishLint(s);
@@ -564,4 +574,4 @@ class Deck {
   }
 }
 
-module.exports = { Deck, G, C, F, parseRich };
+module.exports = { Deck, G, C, B, F, parseRich };
