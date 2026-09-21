@@ -7,7 +7,7 @@ const { Deck } = require(path.join(__dirname, "../scripts/deck_lib.js"));
   const d = new Deck({ title: "営業DX推進に向けた提言", author: "〇〇部", status: "Draft" });
   const SEC = ["現状と課題", "打ち手の検討", "提言", "実行計画"];
 
-  d.cover({ title: "営業DX推進に向けた提言", subtitle: "SFA刷新と営業プロセス標準化による受注率改善", date: "2026年9月", author: "〇〇部 経営企画" });
+  d.cover({ client: "〇〇株式会社", title: "営業DX推進に向けた提言", subtitle: "SFA刷新と営業プロセス標準化による受注率改善", date: "2026年9月", author: "〇〇部 経営企画" });
 
   d.executiveSummary({
     title: "SFA刷新とプロセス標準化により、3年で受注率を5pt改善できる",

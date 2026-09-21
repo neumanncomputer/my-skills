@@ -56,7 +56,10 @@ await d.save("output.pptx");
 
 ## 各関数
 
-### cover({ title, subtitle, date, author })
+### cover({ client, honorific, title, subtitle, date, author })
+- `client`：宛先の企業名。表紙左上に18ptで「〇〇株式会社　御中」と表示
+- `honorific`：敬称。既定は「御中」。個人宛は「様」、敬称不要なら `""`
+- 宛先がわからない場合は `client: "〇〇株式会社"` の伏せ字にし、社内資料で宛先が不要な場合は省略する
 
 ### executiveSummary({ title, lead, points: [{ head, body }] })
 - `lead`：最重要の結論（最大2行、強調1か所）

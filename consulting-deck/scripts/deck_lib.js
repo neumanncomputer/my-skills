@@ -233,9 +233,14 @@ class Deck {
 
   // ================================================================ レイアウト
   /** 表紙 */
-  cover({ title, subtitle, date, author }) {
+  /** 表紙: client（宛先企業名）、honorific（敬称。既定「御中」。個人宛は「様」、不要なら ""） */
+  cover({ title, subtitle, date, author, client, honorific = "御中" }) {
     const s = this.pres.addSlide({ masterName: "COVER" });
     this.count++;
+    if (client) {
+      const to = honorific ? `${stripMarks(client)}　${honorific}` : stripMarks(client);
+      s.addText(to, { x: 0.8, y: 1.0, w: 10.5, h: 0.5, fontFace: F.face, fontSize: 18, color: C.text, valign: "middle", margin: 0, isTextBox: true });
+    }
     s.addText(stripMarks(title), { x: 0.8, y: 2.3, w: 11.7, h: 1.5, fontFace: F.face, fontSize: F.cover, bold: true, color: C.text, valign: "bottom", margin: 0, isTextBox: true });
     if (subtitle) s.addText(stripMarks(subtitle), { x: 0.8, y: 3.95, w: 11.7, h: 0.6, fontFace: F.face, fontSize: 16, color: C.sub, valign: "top", margin: 0, isTextBox: true });
     s.addShape(this.pres.shapes.LINE, { x: 0.8, y: 5.9, w: 11.733, h: 0, line: { ...B.std } });
